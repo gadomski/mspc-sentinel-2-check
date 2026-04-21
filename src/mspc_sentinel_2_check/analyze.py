@@ -53,7 +53,17 @@ def analyze(path: str) -> Analysis:
                 GROUP BY mission, product_level, sensing_start, relative_orbit, mgrs_tile
                 HAVING c > 1
             )),
-            (SELECT COUNT(*) FROM parsed WHERE CAST(SUBSTR(baseline, 2, 2) AS INTEGER) < 5)
+            (SELECT COUNT(*) FROM parsed p
+             WHERE CAST(SUBSTR(p.baseline, 2, 2) AS INTEGER) < 5
+             AND NOT EXISTS (
+                 SELECT 1 FROM parsed q
+                 WHERE q.mission = p.mission
+                 AND q.product_level = p.product_level
+                 AND q.sensing_start = p.sensing_start
+                 AND q.relative_orbit = p.relative_orbit
+                 AND q.mgrs_tile = p.mgrs_tile
+                 AND CAST(SUBSTR(q.baseline, 2, 2) AS INTEGER) >= 5
+             ))
         """,
         [path],
     ).fetchone()
