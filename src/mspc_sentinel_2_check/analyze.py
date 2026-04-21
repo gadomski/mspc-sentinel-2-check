@@ -30,7 +30,7 @@ class Analysis:
 
     total: int = 0
     duplicates: int = 0
-    below_baseline_5: int = 0
+    below_baseline_0510: int = 0
     by_baseline: Counter[str] = field(default_factory=Counter)
 
 
@@ -42,7 +42,7 @@ def analyze(path: str) -> Analysis:
     baseline and processing timestamp.
     """
     con = duckdb.connect()
-    (total, duplicates, below_baseline_5) = con.execute(
+    (total, duplicates, below_baseline_0510) = con.execute(
         _PARSED_CTE
         + """
         SELECT
@@ -54,7 +54,7 @@ def analyze(path: str) -> Analysis:
                 HAVING c > 1
             )),
             (SELECT COUNT(*) FROM parsed p
-             WHERE CAST(SUBSTR(p.baseline, 2, 2) AS INTEGER) < 5
+             WHERE CAST(SUBSTR(p.baseline, 2, 4) AS INTEGER) < 510
              AND NOT EXISTS (
                  SELECT 1 FROM parsed q
                  WHERE q.mission = p.mission
@@ -62,7 +62,7 @@ def analyze(path: str) -> Analysis:
                  AND q.sensing_start = p.sensing_start
                  AND q.relative_orbit = p.relative_orbit
                  AND q.mgrs_tile = p.mgrs_tile
-                 AND CAST(SUBSTR(q.baseline, 2, 2) AS INTEGER) >= 5
+                 AND CAST(SUBSTR(q.baseline, 2, 4) AS INTEGER) >= 510
              ))
         """,
         [path],
@@ -82,6 +82,6 @@ def analyze(path: str) -> Analysis:
     return Analysis(
         total=total,
         duplicates=duplicates,
-        below_baseline_5=below_baseline_5,
+        below_baseline_0510=below_baseline_0510,
         by_baseline=Counter({baseline: count for baseline, count in by_baseline_rows}),
     )

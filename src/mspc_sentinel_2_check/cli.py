@@ -63,7 +63,7 @@ def analyze(
     result = analyze_prefixes(path)
     typer.echo(f"total: {result.total}")
     typer.echo(f"duplicates: {result.duplicates}")
-    typer.echo(f"below baseline 5: {result.below_baseline_5}")
+    typer.echo(f"below baseline 0510: {result.below_baseline_0510}")
     typer.echo("by baseline:")
     for baseline, count in sorted(result.by_baseline.items()):
         typer.echo(f"  {baseline}: {count}")
