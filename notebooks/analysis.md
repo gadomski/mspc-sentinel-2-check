@@ -1,6 +1,6 @@
 # Monthly prefix analysis
 
-Runs `analyze` on every `prefixes-*.parquet` file in the project root and plots:
+Runs `analyze` on every `prefixes-*.parquet` file in each snapshot directory under `data/` and, for each snapshot, plots:
 
 1. A bar chart of items with a processing baseline below 0510 per month.
 2. A stacked bar chart of prefix counts per baseline per month.
@@ -17,69 +17,72 @@ from mspc_sentinel_2_check import Analysis, analyze
 
 
 ```python
-root = Path.cwd().parent
+data_root = Path.cwd().parent / "data"
 pattern = re.compile(r"^prefixes-(\d{4})-(\d{2})\.parquet$")
-results: dict[str, Analysis] = {}
-for path in sorted(root.glob("prefixes-*.parquet")):
-    match = pattern.match(path.name)
-    if match is None:
-        continue
-    year, month = match.groups()
-    results[f"{year}-{month}"] = analyze(str(path))
-list(results)
+snapshots: dict[str, dict[str, Analysis]] = {}
+for snapshot_dir in sorted(p for p in data_root.iterdir() if p.is_dir()):
+    results: dict[str, Analysis] = {}
+    for path in sorted(snapshot_dir.glob("prefixes-*.parquet")):
+        match = pattern.match(path.name)
+        if match is None:
+            continue
+        year, month = match.groups()
+        results[f"{year}-{month}"] = analyze(str(path))
+    snapshots[snapshot_dir.name] = results
+{k: list(v) for k, v in snapshots.items()}
 ```
 
 
 
 
-    ['2021-01',
-     '2021-02',
-     '2021-03',
-     '2021-04',
-     '2021-05',
-     '2021-06',
-     '2021-07',
-     '2021-08',
-     '2021-09',
-     '2021-10',
-     '2021-11',
-     '2021-12',
-     '2022-01',
-     '2022-02',
-     '2022-03',
-     '2022-04',
-     '2022-05',
-     '2022-06',
-     '2022-07',
-     '2022-08',
-     '2022-09',
-     '2022-10',
-     '2022-11',
-     '2022-12',
-     '2023-01',
-     '2023-02',
-     '2023-03',
-     '2023-04',
-     '2023-05',
-     '2023-06',
-     '2023-07',
-     '2023-08',
-     '2023-09',
-     '2023-10',
-     '2023-11',
-     '2023-12',
-     '2024-01',
-     '2024-02',
-     '2024-03',
-     '2024-04',
-     '2024-05',
-     '2024-06',
-     '2024-07',
-     '2024-08',
-     '2024-09',
-     '2024-10',
-     '2024-11',
-     '2024-12']
+    {'2026-04-22': ['2021-01',
+      '2021-02',
+      '2021-03',
+      '2021-04',
+      '2021-05',
+      '2021-06',
+      '2021-07',
+      '2021-08',
+      '2021-09',
+      '2021-10',
+      '2021-11',
+      '2021-12',
+      '2022-01',
+      '2022-02',
+      '2022-03',
+      '2022-04',
+      '2022-05',
+      '2022-06',
+      '2022-07',
+      '2022-08',
+      '2022-09',
+      '2022-10',
+      '2022-11',
+      '2022-12',
+      '2023-01',
+      '2023-02',
+      '2023-03',
+      '2023-04',
+      '2023-05',
+      '2023-06',
+      '2023-07',
+      '2023-08',
+      '2023-09',
+      '2023-10',
+      '2023-11',
+      '2023-12',
+      '2024-01',
+      '2024-02',
+      '2024-03',
+      '2024-04',
+      '2024-05',
+      '2024-06',
+      '2024-07',
+      '2024-08',
+      '2024-09',
+      '2024-10',
+      '2024-11',
+      '2024-12']}
 
 
 
@@ -87,16 +90,17 @@ list(results)
 
 
 ```python
-labels = list(results.keys())
-values = [r.below_baseline_0510 for r in results.values()]
-fig, ax = plt.subplots(figsize=(max(6, len(labels) * 0.5), 4))
-ax.bar(labels, values)
-ax.set_xlabel("month")
-ax.set_ylabel("items below baseline 0510")
-ax.set_title("Sentinel-2 L2A items below baseline 0510 per month")
-ax.tick_params(axis="x", rotation=45)
-fig.tight_layout()
-plt.show()
+for snapshot, results in snapshots.items():
+    labels = list(results.keys())
+    values = [r.below_baseline_0510 for r in results.values()]
+    fig, ax = plt.subplots(figsize=(max(6, len(labels) * 0.5), 4))
+    ax.bar(labels, values)
+    ax.set_xlabel("month")
+    ax.set_ylabel("items below baseline 0510")
+    ax.set_title(f"Sentinel-2 L2A items below baseline 0510 per month ({snapshot})")
+    ax.tick_params(axis="x", rotation=45)
+    fig.tight_layout()
+    plt.show()
 ```
 
 
@@ -109,20 +113,22 @@ plt.show()
 
 
 ```python
-baselines = sorted({b for r in results.values() for b in r.by_baseline})
-fig, ax = plt.subplots(figsize=(max(6, len(labels) * 0.5), 4))
-bottom = [0] * len(labels)
-for baseline in baselines:
-    counts = [results[m].by_baseline.get(baseline, 0) for m in labels]
-    ax.bar(labels, counts, bottom=bottom, label=baseline)
-    bottom = [b + c for b, c in zip(bottom, counts)]
-ax.set_xlabel("month")
-ax.set_ylabel("prefix count")
-ax.set_title("Sentinel-2 L2A prefix count per baseline per month")
-ax.tick_params(axis="x", rotation=45)
-ax.legend(title="baseline")
-fig.tight_layout()
-plt.show()
+for snapshot, results in snapshots.items():
+    labels = list(results.keys())
+    baselines = sorted({b for r in results.values() for b in r.by_baseline})
+    fig, ax = plt.subplots(figsize=(max(6, len(labels) * 0.5), 4))
+    bottom = [0] * len(labels)
+    for baseline in baselines:
+        counts = [results[m].by_baseline.get(baseline, 0) for m in labels]
+        ax.bar(labels, counts, bottom=bottom, label=baseline)
+        bottom = [b + c for b, c in zip(bottom, counts)]
+    ax.set_xlabel("month")
+    ax.set_ylabel("prefix count")
+    ax.set_title(f"Sentinel-2 L2A prefix count per baseline per month ({snapshot})")
+    ax.tick_params(axis="x", rotation=45)
+    ax.legend(title="baseline")
+    fig.tight_layout()
+    plt.show()
 ```
 
 
