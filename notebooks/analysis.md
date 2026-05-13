@@ -82,7 +82,8 @@ for snapshot_dir in sorted(p for p in data_root.iterdir() if p.is_dir()):
       '2024-09',
       '2024-10',
       '2024-11',
-      '2024-12']}
+      '2024-12'],
+     'post-backfill': ['2023-01', '2023-02', '2023-03', '2023-04', '2023-05']}
 
 
 
@@ -106,6 +107,12 @@ for snapshot, results in snapshots.items():
 
     
 ![png](analysis_files/analysis_4_0.png)
+    
+
+
+
+    
+![png](analysis_files/analysis_4_1.png)
     
 
 
@@ -134,5 +141,11 @@ for snapshot, results in snapshots.items():
 
     
 ![png](analysis_files/analysis_6_0.png)
+    
+
+
+
+    
+![png](analysis_files/analysis_6_1.png)
     
 
