@@ -29,6 +29,7 @@ for snapshot_dir in sorted(p for p in data_root.iterdir() if p.is_dir()):
         year, month = match.groups()
         results[f"{year}-{month}"] = analyze(str(path))
     snapshots[snapshot_dir.name] = results
+common_months = sorted(set.intersection(*(set(r) for r in snapshots.values())))
 {k: list(v) for k, v in snapshots.items()}
 ```
 
@@ -83,7 +84,30 @@ for snapshot_dir in sorted(p for p in data_root.iterdir() if p.is_dir()):
       '2024-10',
       '2024-11',
       '2024-12'],
-     'post-backfill': ['2023-01', '2023-02', '2023-03', '2023-04', '2023-05']}
+     'post-backfill': ['2022-01',
+      '2022-02',
+      '2022-03',
+      '2022-04',
+      '2022-05',
+      '2022-06',
+      '2022-07',
+      '2022-08',
+      '2022-09',
+      '2022-10',
+      '2022-11',
+      '2022-12',
+      '2023-01',
+      '2023-02',
+      '2023-03',
+      '2023-04',
+      '2023-05',
+      '2023-06',
+      '2023-07',
+      '2023-08',
+      '2023-09',
+      '2023-10',
+      '2023-11',
+      '2023-12']}
 
 
 
@@ -92,10 +116,9 @@ for snapshot_dir in sorted(p for p in data_root.iterdir() if p.is_dir()):
 
 ```python
 for snapshot, results in snapshots.items():
-    labels = list(results.keys())
-    values = [r.below_baseline_0510 for r in results.values()]
-    fig, ax = plt.subplots(figsize=(max(6, len(labels) * 0.5), 4))
-    ax.bar(labels, values)
+    values = [results[m].below_baseline_0510 for m in common_months]
+    fig, ax = plt.subplots(figsize=(max(6, len(common_months) * 0.5), 4))
+    ax.bar(common_months, values)
     ax.set_xlabel("month")
     ax.set_ylabel("items below baseline 0510")
     ax.set_title(f"Sentinel-2 L2A items below baseline 0510 per month ({snapshot})")
@@ -121,13 +144,12 @@ for snapshot, results in snapshots.items():
 
 ```python
 for snapshot, results in snapshots.items():
-    labels = list(results.keys())
-    baselines = sorted({b for r in results.values() for b in r.by_baseline})
-    fig, ax = plt.subplots(figsize=(max(6, len(labels) * 0.5), 4))
-    bottom = [0] * len(labels)
+    baselines = sorted({b for m in common_months for b in results[m].by_baseline})
+    fig, ax = plt.subplots(figsize=(max(6, len(common_months) * 0.5), 4))
+    bottom = [0] * len(common_months)
     for baseline in baselines:
-        counts = [results[m].by_baseline.get(baseline, 0) for m in labels]
-        ax.bar(labels, counts, bottom=bottom, label=baseline)
+        counts = [results[m].by_baseline.get(baseline, 0) for m in common_months]
+        ax.bar(common_months, counts, bottom=bottom, label=baseline)
         bottom = [b + c for b, c in zip(bottom, counts)]
     ax.set_xlabel("month")
     ax.set_ylabel("prefix count")
