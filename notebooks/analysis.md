@@ -2,7 +2,7 @@
 
 Runs `analyze` on every `prefixes-*.parquet` file in each snapshot directory under `data/` and, for each snapshot, plots:
 
-1. A bar chart of items with a processing baseline below 0510 per month.
+1. A bar chart of items with a processing baseline below 0500 per month.
 2. A stacked bar chart of prefix counts per baseline per month.
 
 
@@ -84,7 +84,19 @@ common_months = sorted(set.intersection(*(set(r) for r in snapshots.values())))
       '2024-10',
       '2024-11',
       '2024-12'],
-     'post-backfill': ['2022-01',
+     'post-backfill': ['2021-01',
+      '2021-02',
+      '2021-03',
+      '2021-04',
+      '2021-05',
+      '2021-06',
+      '2021-07',
+      '2021-08',
+      '2021-09',
+      '2021-10',
+      '2021-11',
+      '2021-12',
+      '2022-01',
       '2022-02',
       '2022-03',
       '2022-04',
@@ -111,17 +123,17 @@ common_months = sorted(set.intersection(*(set(r) for r in snapshots.values())))
 
 
 
-## Items below baseline 0510 per month
+## Items below baseline 0500 per month
 
 
 ```python
 for snapshot, results in snapshots.items():
-    values = [results[m].below_baseline_0510 for m in common_months]
+    values = [results[m].below_baseline_0500 for m in common_months]
     fig, ax = plt.subplots(figsize=(max(6, len(common_months) * 0.5), 4))
     ax.bar(common_months, values)
     ax.set_xlabel("month")
-    ax.set_ylabel("items below baseline 0510")
-    ax.set_title(f"Sentinel-2 L2A items below baseline 0510 per month ({snapshot})")
+    ax.set_ylabel("items below baseline 0500")
+    ax.set_title(f"Sentinel-2 L2A items below baseline 0500 per month ({snapshot})")
     ax.tick_params(axis="x", rotation=45)
     fig.tight_layout()
     plt.show()
