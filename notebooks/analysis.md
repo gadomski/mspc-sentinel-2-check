@@ -85,6 +85,34 @@ months
 
 
 
+## When each month's parquet file was created
+
+
+```python
+from datetime import datetime
+
+from IPython.display import HTML
+
+rows = []
+for month in months:
+    path = snapshot_dir / f"prefixes-{month}.parquet"
+    stat = path.stat()
+    created = getattr(stat, "st_birthtime", stat.st_mtime)
+    rows.append((month, datetime.fromtimestamp(created).strftime("%Y-%m-%d %H:%M:%S")))
+
+table = "<table><tr><th>month</th><th>created</th></tr>"
+table += "".join(f"<tr><td>{m}</td><td>{c}</td></tr>" for m, c in rows)
+table += "</table>"
+HTML(table)
+```
+
+
+
+
+<table><tr><th>month</th><th>created</th></tr><tr><td>2021-01</td><td>2026-06-22 10:06:50</td></tr><tr><td>2021-02</td><td>2026-06-22 10:10:26</td></tr><tr><td>2021-03</td><td>2026-06-22 10:14:14</td></tr><tr><td>2021-04</td><td>2026-06-22 10:18:35</td></tr><tr><td>2021-05</td><td>2026-06-22 10:22:39</td></tr><tr><td>2021-06</td><td>2026-06-22 10:26:50</td></tr><tr><td>2021-07</td><td>2026-06-22 10:30:52</td></tr><tr><td>2021-08</td><td>2026-06-22 10:35:01</td></tr><tr><td>2021-09</td><td>2026-06-22 10:39:14</td></tr><tr><td>2021-10</td><td>2026-06-22 10:43:24</td></tr><tr><td>2021-11</td><td>2026-06-22 13:51:54</td></tr><tr><td>2021-12</td><td>2026-06-22 14:00:07</td></tr><tr><td>2022-01</td><td>2026-06-22 07:26:45</td></tr><tr><td>2022-02</td><td>2026-06-22 07:30:20</td></tr><tr><td>2022-03</td><td>2026-06-22 07:34:02</td></tr><tr><td>2022-04</td><td>2026-06-22 07:38:19</td></tr><tr><td>2022-05</td><td>2026-06-22 07:42:27</td></tr><tr><td>2022-06</td><td>2026-06-22 08:28:20</td></tr><tr><td>2022-07</td><td>2026-06-22 08:32:37</td></tr><tr><td>2022-08</td><td>2026-06-22 08:52:52</td></tr><tr><td>2022-09</td><td>2026-06-22 08:57:13</td></tr><tr><td>2022-10</td><td>2026-06-22 09:01:29</td></tr><tr><td>2022-11</td><td>2026-06-22 09:05:44</td></tr><tr><td>2022-12</td><td>2026-06-22 09:09:24</td></tr><tr><td>2023-01</td><td>2026-06-18 15:38:48</td></tr><tr><td>2023-02</td><td>2026-06-18 15:42:36</td></tr><tr><td>2023-03</td><td>2026-06-18 15:46:28</td></tr><tr><td>2023-04</td><td>2026-06-18 15:50:52</td></tr><tr><td>2023-05</td><td>2026-06-18 15:55:00</td></tr><tr><td>2023-06</td><td>2026-06-18 15:59:15</td></tr><tr><td>2023-07</td><td>2026-06-18 16:03:22</td></tr><tr><td>2023-08</td><td>2026-06-18 16:07:37</td></tr><tr><td>2023-09</td><td>2026-06-18 16:11:54</td></tr><tr><td>2023-10</td><td>2026-06-18 16:16:11</td></tr><tr><td>2023-11</td><td>2026-06-22 06:39:18</td></tr><tr><td>2023-12</td><td>2026-06-22 06:43:01</td></tr><tr><td>2024-01</td><td>2026-06-18 14:10:36</td></tr><tr><td>2024-02</td><td>2026-06-18 14:14:19</td></tr><tr><td>2024-03</td><td>2026-06-18 14:18:12</td></tr><tr><td>2024-04</td><td>2026-06-18 14:22:31</td></tr><tr><td>2024-05</td><td>2026-06-18 14:26:33</td></tr><tr><td>2024-06</td><td>2026-06-18 14:30:36</td></tr><tr><td>2024-07</td><td>2026-06-18 14:34:40</td></tr><tr><td>2024-08</td><td>2026-06-18 14:38:51</td></tr><tr><td>2024-09</td><td>2026-06-18 14:43:06</td></tr><tr><td>2024-10</td><td>2026-06-18 14:46:33</td></tr><tr><td>2024-11</td><td>2026-06-18 14:50:47</td></tr><tr><td>2024-12</td><td>2026-06-18 14:54:32</td></tr></table>
+
+
+
 ## Items below baseline 0500 per month
 
 
@@ -102,7 +130,7 @@ plt.show()
 
 
     
-![png](analysis_files/analysis_4_0.png)
+![png](analysis_files/analysis_6_0.png)
     
 
 
@@ -128,6 +156,6 @@ plt.show()
 
 
     
-![png](analysis_files/analysis_6_0.png)
+![png](analysis_files/analysis_8_0.png)
     
 
